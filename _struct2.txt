@@ -1,0 +1,70 @@
+
+
+===== 59 =====
+## Part 11 — Structured Output
+### Exercise 11
+First, the naive approach: ask for "ONLY JSON" in the prompt.
+
+===== 60 =====
+json_prompt = """Analyze the following student:
+
+Name: Ahmed
+Age: 21
+Grade: 15.5
+Absences: 2
+
+Return ONLY JSON with this structure:
+
+{
+  "name": "...",
+  "age": 0,
+  "grade": 0,
+  "risk": "...",
+  "recommendation": "..."
+}"""
+
+raw = ask(json_prompt, think=False)
+print(raw)
+
+===== 61 =====
+import re
+
+def extract_json(text):
+    """Robust parsing: strip ```json fences and grab the first {...} block."""
+    text = re.sub(r"```(?:json)?", "", text).strip()
+    m = re.search(r"\{.*\}", text, re.DOTALL)
+    return json.loads(m.group(0))
+
+try:
+    print(extract_json(raw))
+except Exception as e:
+    print("❌ Could not parse:", e)
+
+===== 62 =====
+Better: use Ollama's **structured outputs** — pass a JSON Schema in `format` so the output is constrained to be valid.
+
+===== 63 =====
+schema = {
+    "type": "object",
+    "properties": {
+        "name": {"type": "string"},
+        "age": {"type": "integer"},
+        "grade": {"type": "number"},
+        "risk": {"type": "string", "enum": ["low", "medium", "high"]},
+        "recommendation": {"type": "string"},
+    },
+    "required": ["name", "age", "grade", "risk", "recommendation"],
+}
+
+out = generate(json_prompt, fmt=schema, think=False)
+student = json.loads(out["response"])
+print(json.dumps(student, indent=2))
+print("Type of grade:", type(student["grade"]))
+
+===== 64 =====
+### Question
+Why is structured output important when integrating an LLM into a software application?
+
+**✍️ Your answer:**
+
+*(write here)*

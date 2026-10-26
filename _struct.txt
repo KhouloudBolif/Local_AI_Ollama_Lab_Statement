@@ -1,0 +1,78 @@
+
+
+===== 59 markdown =====
+## Part 11 — Structured Output
+### Exercise 11
+First, the naive approach: ask for "ONLY JSON" in the prompt.
+
+===== 62 markdown =====
+Better: use Ollama's **structured outputs** — pass a JSON Schema in `format` so the output is constrained to be valid.
+
+===== 64 markdown =====
+### Question
+Why is structured output important when integrating an LLM into a software application?
+
+**✍️ Your answer:**
+
+*(write here)*
+
+===== 95 code =====
+%%writefile LocalAI_Lab/source/app.py
+"""FSTT Local AI Assistant — Flask + Ollama + local RAG + conversation history."""
+import json, os, time
+import requests
+from flask import Flask, jsonify, render_template, request
+
+import rag
+
+OLLAMA = os.environ.get("OLLAMA_URL", "http://localhost:11434")
+MODEL = os.environ.get("MODEL", "qwen3.5")
+DOC_DIR = os.path.join(os.path.dirname(__file__), "..", "documents")
+MAX_TURNS = 6                      # remembered user/assistant pairs
+
+app = Flask(__name__)
+retriever = rag.Retriever(rag.load_documents(DOC_DIR))
+history = []                       # [{"role": ..., "content": ...}]  (single-user demo)
+
+SYSTEM = ("You are the FSTT Local AI Assistant. Answer questions about the course using only the "
+          "provided CONTEXT. If the answer is not in the context, say: \"Information not available.\" "
+          "Be concise.")
+
+# Structured response schema used for "Analyze ..." / "Quiz ..." style questions
+STRUCT_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "topic": {"type": "string"},
+        "summary": {"type": "string"},
+        "key_points": {"type": "array", "items": {"type": "string"}},
+        "difficulty": {"type": "string", "enum": ["easy", "medium", "hard"]},
+    },
+    "required": ["topic", "summary", "key_points", "difficulty"],
+}
+
+
+def call_ollama(messages, structured=False):
+    payload = {"model": MODEL, "messages": messages, "stream": False, "think": False}
+    if structured:
+        payload["format"] = STRUCT_SCHEMA
+    r = requests.post(f"{OLLAMA}/api/chat", json=payload, timeout=600)
+    r.raise_for_status()
+    return r.json()
+
+
+@app.route("/")
+def index():
+    return render_template("index.html", model=MODEL, docs=list(retriever.docs))
+
+
+@app.route("/ask", methods=["POST"])
+def ask():
+    body = request.get_json(force=True)
+    question = (body.get("question") or "").strip()
+    structured = bool(body.get("structured"))
+    if not question:
+        return jsonify(error="Empty question"), 400
+
+    hits, context = retriever.context(question, k=2)
+    user_msg = f"CONTEXT:\n{context or '(none)'}\n\nQUESTION: {question}"
+    messages = [{"role": "system", "content": SYSTEM}] + history[-2 * MAX_TU

@@ -1,0 +1,15 @@
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on http://127.0.0.1:5001
+Press CTRL+C to quit
+127.0.0.1 - - [26/Oct/2026 23:22:47] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [26/Oct/2026 23:23:19] "POST /ask HTTP/1.1" 200 -
+127.0.0.1 - - [26/Oct/2026 23:23:35] "POST /ask HTTP/1.1" 200 -
+127.0.0.1 - - [26/Oct/2026 23:23:50] "POST /ask HTTP/1.1" 200 -
+127.0.0.1 - - [26/Oct/2026 23:24:06] "POST /ask HTTP/1.1" 200 -
+127.0.0.1 - - [26/Oct/2026 23:24:42] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [26/Oct/2026 23:24:42] "GET /favicon.ico HTTP/1.1" 404 -
+127.0.0.1 - - [26/Oct/2026 23:26:10] "POST /ask HTTP/1.1" 200 -
+127.0.0.1 - - [26/Oct/2026 23:32:48] "POST /reset HTTP/1.1" 200 -
+127.0.0.1 - - [26/Oct/2026 23:39:14] "GET / HTTP/1.1" 200 -
